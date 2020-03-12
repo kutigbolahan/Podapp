@@ -6,24 +6,23 @@ import 'package:http/http.dart' as http;
 
 final url = 'https://itsallwidgets.com/podcast/feed';
 
-class Podcast with ChangeNotifier{
-   RssFeed _feed;
-   RssItem _selecteditem;
+class Podcast with ChangeNotifier {
+  RssFeed _feed;
+  RssItem _selecteditem;
 
-   RssFeed get feed=> _feed;
-   void parse(String xmlStr)async{
-     final res = await http.get(url);
-     final xmlStr = res.body;
-     _feed=RssFeed.parse(xmlStr);
-     notifyListeners();
-   }
-   
+  RssFeed get feed => _feed;
+  void parse(String xmlStr) async {
+    final res = await http.get(url);
+    final xmlStr = res.body;
+    _feed = RssFeed.parse(xmlStr);
+    notifyListeners();
+  }
 
-   RssItem get selectedItem => _selecteditem;
-    set selectedItem(RssItem value){
-     _selecteditem= value;
-     notifyListeners();
-   }
+  RssItem get selectedItem => _selecteditem;
+  set selectedItem(RssItem value) {
+    _selecteditem = value;
+    notifyListeners();
+  }
 }
 
 void main() => runApp(MyApp());
@@ -31,21 +30,16 @@ void main() => runApp(MyApp());
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return MultiProvider(
-      providers: [
-        ChangeNotifierProvider(
-          create: (builder)=>Podcast()
-          )
-      ],
-          child: MaterialApp(
-        debugShowCheckedModeBanner: false,
-        title: 'Flutter Demo',
-        theme: ThemeData(
-          primarySwatch: Colors.blue,
-        ),
-        home: EpisodesPage(),
-      ),
-    );
+    return ChangeNotifierProvider(
+        create: (builder) => Podcast()..parse(url),
+        child: MaterialApp(
+          debugShowCheckedModeBanner: false,
+          title: 'Flutter Demo',
+          theme: ThemeData(
+            primarySwatch: Colors.blue,
+          ),
+          home: EpisodesPage(),
+        ));
   }
 }
 
@@ -53,27 +47,31 @@ class EpisodesPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-       body: Consumer(builder: (context, podcast, _){
-         return EpisodeListView(rssFeed: podcast.feed);
-       })
-      //FutureBuilder(
-      //   future: http.get(url),
-      //   builder: (context, AsyncSnapshot<http.Response> snapshot) {
-      //     if (snapshot.hasData) {
-      //       final response = snapshot.data;
-      //       if (response.statusCode == 200) {
-      //         final rssString = response.body;
-      //         var rssFeed = RssFeed.parse(rssString);
-      //         return EpisodeListView(rssFeed: rssFeed);
-      //       }
-      //     } else {
-      //       return Center(
-      //         child: CircularProgressIndicator(),
-      //       );
-      //     }
-      //   },
-      // ),
-    );
+      body: Consumer<Podcast>(builder: (context, podcast, _) {
+      return podcast.feed !=null 
+      ? EpisodeListView(rssFeed: podcast.feed)
+      : Center(
+        child: CircularProgressIndicator(),
+      );
+    })
+        //FutureBuilder(
+        //   future: http.get(url),
+        //   builder: (context, AsyncSnapshot<http.Response> snapshot) {
+        //     if (snapshot.hasData) {
+        //       final response = snapshot.data;
+        //       if (response.statusCode == 200) {
+        //         final rssString = response.body;
+        //         var rssFeed = RssFeed.parse(rssString);
+        //         return EpisodeListView(rssFeed: rssFeed);
+        //       }
+        //     } else {
+        //       return Center(
+        //         child: CircularProgressIndicator(),
+        //       );
+        //     }
+        //   },
+        // ),
+        );
   }
 }
 
@@ -96,10 +94,9 @@ class EpisodeListView extends StatelessWidget {
                     maxLines: 3,
                     overflow: TextOverflow.ellipsis,
                   ),
-                  onTap: (){
-                 Navigator.of(context).push(MaterialPageRoute(builder: (_)=>
-                   PlayerPage(item: i)
-                 ));
+                  onTap: () {
+                    Navigator.of(context).push(
+                        MaterialPageRoute(builder: (_) => PlayerPage(item: i)));
                   },
                 ))
             .toList());
@@ -112,10 +109,10 @@ class PlayerPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(item.title),
-      ),
-      body: SafeArea(child: Player()));
+        appBar: AppBar(
+          title: Text(item.title),
+        ),
+        body: SafeArea(child: Player()));
   }
 }
 
