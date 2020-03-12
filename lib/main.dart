@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_sound/flutter_sound.dart';
+import 'package:provider/provider.dart';
 import 'package:webfeed/webfeed.dart';
 import 'package:http/http.dart' as http;
 
@@ -10,10 +11,13 @@ class Podcast with ChangeNotifier{
    RssItem _selecteditem;
 
    RssFeed get feed=> _feed;
-    set feed(RssFeed value){
-     _feed= value;
+   void parse(String xmlStr)async{
+     final res = await http.get(url);
+     final xmlStr = res.body;
+     _feed=RssFeed.parse(xmlStr);
      notifyListeners();
    }
+   
 
    RssItem get selectedItem => _selecteditem;
     set selectedItem(RssItem value){
@@ -27,13 +31,20 @@ void main() => runApp(MyApp());
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(
+          create: (builder)=>Podcast()
+          )
+      ],
+          child: MaterialApp(
+        debugShowCheckedModeBanner: false,
+        title: 'Flutter Demo',
+        theme: ThemeData(
+          primarySwatch: Colors.blue,
+        ),
+        home: EpisodesPage(),
       ),
-      home: EpisodesPage(),
     );
   }
 }
@@ -42,23 +53,26 @@ class EpisodesPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: FutureBuilder(
-        future: http.get(url),
-        builder: (context, AsyncSnapshot<http.Response> snapshot) {
-          if (snapshot.hasData) {
-            final response = snapshot.data;
-            if (response.statusCode == 200) {
-              final rssString = response.body;
-              var rssFeed = RssFeed.parse(rssString);
-              return EpisodeListView(rssFeed: rssFeed);
-            }
-          } else {
-            return Center(
-              child: CircularProgressIndicator(),
-            );
-          }
-        },
-      ),
+       body: Consumer(builder: (context, podcast, _){
+         return EpisodeListView(rssFeed: podcast.feed);
+       })
+      //FutureBuilder(
+      //   future: http.get(url),
+      //   builder: (context, AsyncSnapshot<http.Response> snapshot) {
+      //     if (snapshot.hasData) {
+      //       final response = snapshot.data;
+      //       if (response.statusCode == 200) {
+      //         final rssString = response.body;
+      //         var rssFeed = RssFeed.parse(rssString);
+      //         return EpisodeListView(rssFeed: rssFeed);
+      //       }
+      //     } else {
+      //       return Center(
+      //         child: CircularProgressIndicator(),
+      //       );
+      //     }
+      //   },
+      // ),
     );
   }
 }
