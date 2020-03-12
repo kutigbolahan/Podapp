@@ -46,13 +46,12 @@ class MyApp extends StatelessWidget {
 class EpisodesPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Consumer<Podcast>(builder: (context, podcast, _) {
-      return podcast.feed !=null 
-      ? EpisodeListView(rssFeed: podcast.feed)
-      : Center(
-        child: CircularProgressIndicator(),
-      );
+    return Scaffold(body: Consumer<Podcast>(builder: (context, podcast, _) {
+      return podcast.feed != null
+          ? EpisodeListView(rssFeed: podcast.feed)
+          : Center(
+              child: CircularProgressIndicator(),
+            );
     })
         //FutureBuilder(
         //   future: http.get(url),
@@ -95,8 +94,12 @@ class EpisodeListView extends StatelessWidget {
                     overflow: TextOverflow.ellipsis,
                   ),
                   onTap: () {
+                    Provider.of<Podcast>(context,listen: false).selectedItem = i;
                     Navigator.of(context).push(
-                        MaterialPageRoute(builder: (_) => PlayerPage(item: i)));
+                      MaterialPageRoute(
+                        builder: (_) => PlayerPage(),
+                      ),
+                    );
                   },
                 ))
             .toList());
@@ -104,13 +107,13 @@ class EpisodeListView extends StatelessWidget {
 }
 
 class PlayerPage extends StatelessWidget {
-  PlayerPage({this.item});
-  final RssItem item;
+  
   @override
   Widget build(BuildContext context) {
+    
     return Scaffold(
         appBar: AppBar(
-          title: Text(item.title),
+          title: Text(Provider.of<Podcast>(context).selectedItem.title),
         ),
         body: SafeArea(child: Player()));
   }
@@ -119,9 +122,10 @@ class PlayerPage extends StatelessWidget {
 class Player extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    final item =Provider.of<Podcast>(context).selectedItem;
     return Column(
       children: <Widget>[
-        Flexible(flex: 9, child: Placeholder()),
+        Flexible(flex: 9, child: Text(item.description)),
         Flexible(flex: 2, child: AudioControls())
       ],
     );
@@ -145,8 +149,7 @@ class PlaybackButtons extends StatefulWidget {
 class _PlaybackButtonsState extends State<PlaybackButtons> {
   bool _isPlaying = false;
   FlutterSound _sound;
-  final url =
-      'https://incompetech.com/music/royalty-free/mp3-royaltyfree/Surf%20Shimmy.mp3';
+  
   // FlutterSound flutterSound = FlutterSound();
   double playPosition;
   Stream<PlayStatus> _playerSubscription;
@@ -164,7 +167,7 @@ class _PlaybackButtonsState extends State<PlaybackButtons> {
     });
   }
 
-  void _play() async {
+  void _play(String url) async {
     await _sound.startPlayer(url);
     _playerSubscription = _sound.onPlayerStateChanged
       ..listen((e) {
@@ -184,6 +187,7 @@ class _PlaybackButtonsState extends State<PlaybackButtons> {
 
   @override
   Widget build(BuildContext context) {
+    final item =Provider.of<Podcast>(context).selectedItem;
     return SingleChildScrollView(
       child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -197,7 +201,7 @@ class _PlaybackButtonsState extends State<PlaybackButtons> {
                   if (_isPlaying) {
                     _stop();
                   } else {
-                    _play();
+                    _play(item.guid);
                   }
                 },
               ),
