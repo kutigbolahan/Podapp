@@ -1,5 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_sound/flutter_sound.dart';
+import 'package:webfeed/webfeed.dart';
+import 'package:http/http.dart' as http;
+
+
+
+final url ='https://itsallwidgets.com/podcast/feed';
 
 void main() => runApp(MyApp());
 
@@ -7,23 +13,72 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       title: 'Flutter Demo',
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: MyHomePage(),
+      home: EpisodesPage(),
     );
   }
 }
 
-class MyHomePage extends StatelessWidget {
+class EpisodesPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Scaffold(body: SafeArea(child: PodApp()));
+    return Scaffold(
+      body: FutureBuilder(
+        future: http.get(url),
+        builder: (context, AsyncSnapshot<http.Response>snapshot){
+          if(snapshot.hasData){
+            final response = snapshot.data;
+            if(response.statusCode == 200){
+              final rssString=response.body;
+              var rssFeed= RssFeed.parse(rssString);
+              return EpisodeTile(rssFeed: rssFeed);
+            }
+          }else{
+            return Center(
+             child: CircularProgressIndicator(),
+            );
+          }
+        },
+      ),
+    );
   }
 }
 
-class PodApp extends StatelessWidget {
+class EpisodeTile extends StatelessWidget {
+  const EpisodeTile({
+    Key key,
+    @required this.rssFeed,
+  }) : super(key: key);
+
+  final RssFeed rssFeed;
+
+  @override
+  Widget build(BuildContext context) {
+    return ListWheelScrollView(
+      itemExtent: 42,
+      diameterRatio: 2.5, 
+      
+      useMagnifier: true,
+      magnification: 1.5,
+      children: rssFeed.items.map((i) => ListTile(
+        title: Text(i.title),
+        
+      )).toList());
+  }
+}
+
+class PlayerPage extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(body: SafeArea(child: Player()));
+  }
+}
+
+class Player extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Column(
