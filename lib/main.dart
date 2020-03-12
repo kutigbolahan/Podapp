@@ -5,6 +5,23 @@ import 'package:http/http.dart' as http;
 
 final url = 'https://itsallwidgets.com/podcast/feed';
 
+class Podcast with ChangeNotifier{
+   RssFeed _feed;
+   RssItem _selecteditem;
+
+   RssFeed get feed=> _feed;
+    set feed(RssFeed value){
+     _feed= value;
+     notifyListeners();
+   }
+
+   RssItem get selectedItem => _selecteditem;
+    set selectedItem(RssItem value){
+     _selecteditem= value;
+     notifyListeners();
+   }
+}
+
 void main() => runApp(MyApp());
 
 class MyApp extends StatelessWidget {
