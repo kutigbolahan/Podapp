@@ -94,7 +94,8 @@ class EpisodeListView extends StatelessWidget {
                     overflow: TextOverflow.ellipsis,
                   ),
                   onTap: () {
-                    Provider.of<Podcast>(context,listen: false).selectedItem = i;
+                    Provider.of<Podcast>(context, listen: false).selectedItem =
+                        i;
                     Navigator.of(context).push(
                       MaterialPageRoute(
                         builder: (_) => PlayerPage(),
@@ -107,10 +108,8 @@ class EpisodeListView extends StatelessWidget {
 }
 
 class PlayerPage extends StatelessWidget {
-  
   @override
   Widget build(BuildContext context) {
-    
     return Scaffold(
         appBar: AppBar(
           title: Text(Provider.of<Podcast>(context).selectedItem.title),
@@ -122,10 +121,21 @@ class PlayerPage extends StatelessWidget {
 class Player extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    final item =Provider.of<Podcast>(context).selectedItem;
+    final podcast = Provider.of<Podcast>(context);
     return Column(
       children: <Widget>[
-        Flexible(flex: 9, child: Text(item.description)),
+        Flexible(
+          flex: 5,
+          child: Image.network(podcast.feed.image.url,
+          
+          ),
+        ),
+        Flexible(
+          flex: 4,
+          child: SingleChildScrollView(
+            child: Text(podcast.selectedItem.description),
+          ),
+        ),
         Flexible(flex: 2, child: AudioControls())
       ],
     );
@@ -149,7 +159,7 @@ class PlaybackButtons extends StatefulWidget {
 class _PlaybackButtonsState extends State<PlaybackButtons> {
   bool _isPlaying = false;
   FlutterSound _sound;
-  
+
   // FlutterSound flutterSound = FlutterSound();
   double playPosition;
   Stream<PlayStatus> _playerSubscription;
@@ -187,7 +197,7 @@ class _PlaybackButtonsState extends State<PlaybackButtons> {
 
   @override
   Widget build(BuildContext context) {
-    final item =Provider.of<Podcast>(context).selectedItem;
+    final item = Provider.of<Podcast>(context).selectedItem;
     return SingleChildScrollView(
       child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
