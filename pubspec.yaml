@@ -17,6 +17,8 @@ dependencies:
   webfeed:
   http:
   provider: ^4.0.4 
+  path_provider: ^1.6.5
+  path:
 
 dev_dependencies:
   flutter_test:
