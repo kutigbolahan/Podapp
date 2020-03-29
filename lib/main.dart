@@ -9,12 +9,13 @@ import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as path;
 
 final url = 'https://itsallwidgets.com/podcast/feed';
-final pathSuffix = '/dashcast/downloads';
+final pathSuffix = 'dashcast/downloads';
 //trying to download the podcast to the pathsuffix folder
 Future<String> _getDownloadPath(String filename) async {
   final dir = await getApplicationDocumentsDirectory();
   final prefix = dir.uri.path;
-  return path.join(prefix, pathSuffix, filename);
+  final absolutePath = path.join(prefix, filename);
+  return absolutePath;
 }
 
 class Podcast with ChangeNotifier {
@@ -42,32 +43,21 @@ class Podcast with ChangeNotifier {
     final res = await client.send(req);
     if (res.statusCode!=200)
       throw Exception('Unexpected HTTPcode:${res.statusCode}');
-    // res.stream.listen((bytes) {
-    //   print('Received ${bytes.length} bytes');
-    // });
+    
 
 final file = File(await _getDownloadPath(path.split(item.guid).last));
+res.stream.listen((byte) {
+ print('${byte.length}');
+  });
+
  res.stream.pipe(file.openWrite()).whenComplete(() {
        print('Downloading Complete');
      });
 
-//     print('Running download for ${item.guid}');
-//     http.StreamedRequest req =http.StreamedRequest(
-//       'GET',
-//       Uri.parse(item.guid),
-
-//       );
-//      final futureRes= req.send();
-//      final res = await futureRes;
-//      if (res.statusCode!=200)
-//        throw Exception('Unexpected HTTPcode:${res.statusCode}');
-//    print('Starting stream');
-//       res.stream.listen((bytes){
-// print('Received ${bytes.length} bytes');
-//       });
 
     
   }
+  
 }
 
 void main() => runApp(MyApp());
