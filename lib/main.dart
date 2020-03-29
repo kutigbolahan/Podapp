@@ -11,17 +11,16 @@ import 'package:path/path.dart' as path;
 final url = 'https://itsallwidgets.com/podcast/feed';
 final pathSuffix = '/dashcast/downloads';
 //trying to download the podcast to the pathsuffix folder
-Future<String> _getDownloadPath(String filename)async{
-  final dir =  await getApplicationDocumentsDirectory();
- final prefix = dir.uri.path;
- return path.join(prefix, pathSuffix,filename);
-
+Future<String> _getDownloadPath(String filename) async {
+  final dir = await getApplicationDocumentsDirectory();
+  final prefix = dir.uri.path;
+  return path.join(prefix, pathSuffix, filename);
 }
 
 class Podcast with ChangeNotifier {
   RssFeed _feed;
   RssItem _selecteditem;
-  Map<String ,bool>downloadStatus;
+  Map<String, bool> downloadStatus;
 
   RssFeed get feed => _feed;
   void parse(String xmlStr) async {
@@ -37,23 +36,37 @@ class Podcast with ChangeNotifier {
     notifyListeners();
   }
 
-  void download(RssItem item)async{
-    http.StreamedRequest req =http.StreamedRequest(
-      'GET',
-      Uri.parse(item.guid),
-      
-      );
-     final res=await req.send();
-     if (res.statusCode!=200) 
-       throw Exception('Unexpected HTTPcode:${res.statusCode}');
+  void download(RssItem item) async {
+    final client = http.Client();
+    final req = http.Request('GET', Uri.parse(item.guid));
+    final res = await client.send(req);
+    if (res.statusCode!=200)
+      throw Exception('Unexpected HTTPcode:${res.statusCode}');
+    // res.stream.listen((bytes) {
+    //   print('Received ${bytes.length} bytes');
+    // });
 
-       final file = File(await _getDownloadPath(
-         path.split(item.guid).last
-       ));
-      
-     res.stream.pipe(file.openWrite()).whenComplete(() {
+final file = File(await _getDownloadPath(path.split(item.guid).last));
+ res.stream.pipe(file.openWrite()).whenComplete(() {
        print('Downloading Complete');
      });
+
+//     print('Running download for ${item.guid}');
+//     http.StreamedRequest req =http.StreamedRequest(
+//       'GET',
+//       Uri.parse(item.guid),
+
+//       );
+//      final futureRes= req.send();
+//      final res = await futureRes;
+//      if (res.statusCode!=200)
+//        throw Exception('Unexpected HTTPcode:${res.statusCode}');
+//    print('Starting stream');
+//       res.stream.listen((bytes){
+// print('Received ${bytes.length} bytes');
+//       });
+
+    
   }
 }
 
@@ -66,7 +79,6 @@ class MyApp extends StatelessWidget {
         create: (builder) => Podcast()..parse(url),
         child: MaterialApp(
           debugShowCheckedModeBanner: false,
-         
           theme: ThemeData(
             primarySwatch: Colors.blue,
           ),
@@ -78,9 +90,7 @@ class MyApp extends StatelessWidget {
 class EpisodesPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Consumer<Podcast>(builder: (context, podcast, _)
-   {
+    return Scaffold(body: Consumer<Podcast>(builder: (context, podcast, _) {
       return podcast.feed != null
           ? EpisodeListView(rssFeed: podcast.feed)
           : Center(
@@ -128,15 +138,14 @@ class EpisodeListView extends StatelessWidget {
                     overflow: TextOverflow.ellipsis,
                   ),
                   trailing: IconButton(
-                    icon: Icon(Icons.arrow_downward),
-                     onPressed: (){
-                       Provider.of<Podcast>(context,listen: false).download(i);
-                       Scaffold.of(context).showSnackBar(
-                         SnackBar(content:Text('Downloading ${i.title}'),
-                          )
-                       );
-                     }
-                     ),
+                      icon: Icon(Icons.arrow_downward),
+                      onPressed: () {
+                        Provider.of<Podcast>(context, listen: false)
+                            .download(i);
+                        Scaffold.of(context).showSnackBar(SnackBar(
+                          content: Text('Downloading ${i.title}'),
+                        ));
+                      }),
                   onTap: () {
                     Provider.of<Podcast>(context, listen: false).selectedItem =
                         i;
@@ -170,8 +179,8 @@ class Player extends StatelessWidget {
       children: <Widget>[
         Flexible(
           flex: 5,
-          child: Image.network(podcast.feed.image.url,
-          
+          child: Image.network(
+            podcast.feed.image.url,
           ),
         ),
         Flexible(
