@@ -41,23 +41,18 @@ class Podcast with ChangeNotifier {
     final client = http.Client();
     final req = http.Request('GET', Uri.parse(item.guid));
     final res = await client.send(req);
-    if (res.statusCode!=200)
+    if (res.statusCode != 200)
       throw Exception('Unexpected HTTPcode:${res.statusCode}');
-    
 
-final file = File(await _getDownloadPath(path.split(item.guid).last));
-res.stream.listen((byte) {
- print('${byte.length}');
-  });
+    final file = File(await _getDownloadPath(path.split(item.guid).last));
+    res.stream.listen((byte) {
+      print('${byte.length}');
+    });
 
- res.stream.pipe(file.openWrite()).whenComplete(() {
-       print('Downloading Complete');
-     });
-
-
-    
+    res.stream.pipe(file.openWrite()).whenComplete(() {
+      print('Downloading Complete');
+    });
   }
-  
 }
 
 void main() => runApp(MyApp());
@@ -72,39 +67,78 @@ class MyApp extends StatelessWidget {
           theme: ThemeData(
             primarySwatch: Colors.blue,
           ),
-          home: EpisodesPage(),
+          home: MyPage(),
         ));
   }
 }
 
+class MyPage extends StatefulWidget {
+  @override
+  _MyPageState createState() => _MyPageState();
+}
+
+class _MyPageState extends State<MyPage> {
+  var navIndex =0;
+  
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: EpisodesPage(),
+      bottomNavigationBar: MyNavBar(),
+    );
+  }
+}
+
+class MyNavBar extends StatefulWidget {
+  @override
+  _MyNavBarState createState() => _MyNavBarState();
+}
+
+class _MyNavBarState extends State<MyNavBar> {
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: 20,
+      color: Colors.red,
+    );
+  }
+}
+
+class DummyPage extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: const Text('DummyPage'),
+    );
+  }
+}
 class EpisodesPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Scaffold(body: Consumer<Podcast>(builder: (context, podcast, _) {
+    return Consumer<Podcast>(builder: (context, podcast, _) {
       return podcast.feed != null
           ? EpisodeListView(rssFeed: podcast.feed)
           : Center(
               child: CircularProgressIndicator(),
             );
-    })
-        //FutureBuilder(
-        //   future: http.get(url),
-        //   builder: (context, AsyncSnapshot<http.Response> snapshot) {
-        //     if (snapshot.hasData) {
-        //       final response = snapshot.data;
-        //       if (response.statusCode == 200) {
-        //         final rssString = response.body;
-        //         var rssFeed = RssFeed.parse(rssString);
-        //         return EpisodeListView(rssFeed: rssFeed);
-        //       }
-        //     } else {
-        //       return Center(
-        //         child: CircularProgressIndicator(),
-        //       );
-        //     }
-        //   },
-        // ),
-        );
+    });
+    //FutureBuilder(
+    //   future: http.get(url),
+    //   builder: (context, AsyncSnapshot<http.Response> snapshot) {
+    //     if (snapshot.hasData) {
+    //       final response = snapshot.data;
+    //       if (response.statusCode == 200) {
+    //         final rssString = response.body;
+    //         var rssFeed = RssFeed.parse(rssString);
+    //         return EpisodeListView(rssFeed: rssFeed);
+    //       }
+    //     } else {
+    //       return Center(
+    //         child: CircularProgressIndicator(),
+    //       );
+    //     }
+    //   },
+    // ),
   }
 }
 
