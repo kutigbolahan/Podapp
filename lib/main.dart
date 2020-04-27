@@ -73,23 +73,35 @@ class MyApp extends StatelessWidget {
 }
 
 class MyPage extends StatefulWidget {
+  
   @override
   _MyPageState createState() => _MyPageState();
 }
 
 class _MyPageState extends State<MyPage> {
   var navIndex =0;
-  
+  final pages =List<Widget>.unmodifiable([
+    EpisodesPage(),
+    DummyPage()
+  ]);
+  final iconList = List<IconData>.unmodifiable([
+    Icons.hot_tub,
+    Icons.timelapse
+  ]);
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: EpisodesPage(),
-      bottomNavigationBar: MyNavBar(),
+      body: pages[navIndex],
+      bottomNavigationBar: MyNavBar(icons: iconList,),
     );
   }
 }
 
 class MyNavBar extends StatefulWidget {
+ final  List<IconData> icons ;
+
+  const MyNavBar({Key key, @required this.icons}) : assert(icons != null) ;
+  
   @override
   _MyNavBarState createState() => _MyNavBarState();
 }
@@ -97,9 +109,15 @@ class MyNavBar extends StatefulWidget {
 class _MyNavBarState extends State<MyNavBar> {
   @override
   Widget build(BuildContext context) {
-    return Container(
-      height: 20,
-      color: Colors.red,
+    return Container( 
+      height: 50,
+      child: Row(
+        children: [
+          for (var i = 0; i < widget.icons; i++) 
+            
+          
+        ],
+      ),
     );
   }
 }
