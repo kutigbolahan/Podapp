@@ -87,8 +87,9 @@ class _MyPageState extends State<MyPage> {
     return Scaffold(
       body: pages[navIndex],
       bottomNavigationBar: MyNavBar(
+        activeIndex: navIndex,
         icons: iconList,
-        onPressed: (i){
+        onPressed: (i) {
           setState(() {
             navIndex = i;
           });
@@ -100,8 +101,14 @@ class _MyPageState extends State<MyPage> {
 
 class MyNavBar extends StatefulWidget {
   final List<IconData> icons;
-final Function(int)onPressed;
-  const MyNavBar({Key key, @required this.icons, @required this.onPressed}) : assert(icons != null);
+  final Function(int) onPressed;
+  final int activeIndex;
+  const MyNavBar(
+      {Key key,
+      @required this.icons,
+      @required this.onPressed,
+      @required this.activeIndex})
+      : assert(icons != null);
 
   @override
   _MyNavBarState createState() => _MyNavBarState();
@@ -112,9 +119,14 @@ class _MyNavBarState extends State<MyNavBar> {
   Widget build(BuildContext context) {
     return Container(
       height: 50,
-      child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: [for (var icon in widget.icons) Icon(icon)]),
+      child: Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
+        for (var i = 0; i < widget.icons.length; i++)
+          IconButton(
+            onPressed: ()=> widget.onPressed(i),
+           icon:Icon( widget.icons[i]),
+            color: i == widget.activeIndex ? Colors.yellow[700] : Colors.black54,
+          )
+      ]),
     );
   }
 }
