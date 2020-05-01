@@ -73,35 +73,36 @@ class MyApp extends StatelessWidget {
 }
 
 class MyPage extends StatefulWidget {
-  
   @override
   _MyPageState createState() => _MyPageState();
 }
 
 class _MyPageState extends State<MyPage> {
-  var navIndex =0;
-  final pages =List<Widget>.unmodifiable([
-    EpisodesPage(),
-    DummyPage()
-  ]);
-  final iconList = List<IconData>.unmodifiable([
-    Icons.hot_tub,
-    Icons.timelapse
-  ]);
+  var navIndex = 0;
+  final pages = List<Widget>.unmodifiable([EpisodesPage(), DummyPage()]);
+  final iconList =
+      List<IconData>.unmodifiable([Icons.hot_tub, Icons.timelapse]);
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: pages[navIndex],
-      bottomNavigationBar: MyNavBar(icons: iconList,),
+      bottomNavigationBar: MyNavBar(
+        icons: iconList,
+        onPressed: (i){
+          setState(() {
+            navIndex = i;
+          });
+        },
+      ),
     );
   }
 }
 
 class MyNavBar extends StatefulWidget {
- final  List<IconData> icons ;
+  final List<IconData> icons;
+final Function(int)onPressed;
+  const MyNavBar({Key key, @required this.icons, @required this.onPressed}) : assert(icons != null);
 
-  const MyNavBar({Key key, @required this.icons}) : assert(icons != null) ;
-  
   @override
   _MyNavBarState createState() => _MyNavBarState();
 }
@@ -109,15 +110,11 @@ class MyNavBar extends StatefulWidget {
 class _MyNavBarState extends State<MyNavBar> {
   @override
   Widget build(BuildContext context) {
-    return Container( 
+    return Container(
       height: 50,
       child: Row(
-        children: [
-          for (var i = 0; i < widget.icons; i++) 
-            
-          
-        ],
-      ),
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [for (var icon in widget.icons) Icon(icon)]),
     );
   }
 }
@@ -130,6 +127,7 @@ class DummyPage extends StatelessWidget {
     );
   }
 }
+
 class EpisodesPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
